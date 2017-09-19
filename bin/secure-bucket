@@ -1,0 +1,66 @@
+#!/usr/bin/env ruby
+require "aws-sdk"
+require "slop"
+
+opts = Slop.parse do |o|
+  o.string '-b', '--bucket', 'bucket/user name'
+  o.bool '-k', '--keys', 'Regenerate access keys'
+end
+
+unless opts[:bucket]
+  puts opts
+  exit(1)
+end
+
+
+
+bucket_name = opts[:bucket]
+bucket = Aws::S3::Bucket.new(bucket_name)
+
+if bucket.exists?()
+  puts "Bucket exists"
+else
+  puts "Bucket do not exist. Creating..."
+  bucket.create()
+end
+
+user = Aws::IAM::User.new(bucket_name)
+
+if user.exists?()
+  puts "user exists"
+else
+  puts "User do not exist. Creating..."
+  user.create()
+end
+
+puts
+puts
+user_policy = Aws::IAM::UserPolicy.new(bucket_name, bucket_name)
+
+policy = {
+  "Version":"2012-10-17",
+  "Statement":[
+    {
+      "Sid":"AddPerm",
+      "Effect":"Allow",
+      "Action":["s3:*"],
+      "Resource":["arn:aws:s3:::#{bucket_name}/*",
+      "arn:aws:s3:::#{bucket_name}"
+      ]
+    }
+  ]
+}
+
+puts "Setting policy..."
+user_policy.put(policy_document: policy.to_json)
+
+if opts.keys?
+  user.access_keys.each do |access_key|
+    access_key.delete()
+  end
+  user.create_access_key_pair().data().to_h.each do |k,v|
+    puts "#{k} :\t#{v}"
+  end
+end
+puts
+puts "Success!"
