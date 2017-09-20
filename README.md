@@ -3,10 +3,10 @@
 
 
 Sets up a bucket on s3 and an IAM user which only has accesss to the given bucket.
-The command is idempotent and can be run multiple times. It creates bucket and user if they do not exist. It overwrites the policy if it already exist.
+The command is idempotent and can be run multiple times. It creates a bucket and an user if they do not exist. It overwrites the policy if it already exist.
 
 ## Setup
-You need a AWS credential file or AWS credentials in your ENV, with permission to create new users, buckets and policies.
+You need an AWS credential file or AWS credentials in your ENV, with permission to create new users, buckets and policies.
 See: http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html
 
 ## Usage
